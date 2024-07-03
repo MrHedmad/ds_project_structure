@@ -188,7 +188,7 @@ plot_result <- function(data_graph, title = "") {
 
 p <- plot_result(strip_names(graph3))
 
-png("~/Desktop/test.png", width = 10, height=10, units = "in", res = 400)
+pdf("~/Desktop/test.pdf", width = 15, height=15)
 print(p)
 dev.off()
 
