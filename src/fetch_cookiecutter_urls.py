@@ -3,7 +3,7 @@ from sys import stderr, stdout
 
 import requests as rq
 from bs4 import BeautifulSoup
-
+from time import sleep
 
 def pprint(*args, **kwargs):
     print(*args, **kwargs, file=stderr)
@@ -18,6 +18,9 @@ while True:
     pprint(f"Checking url {url}...")
 
     response = rq.get(url)
+
+    response.raise_for_status()
+
     soup = BeautifulSoup(response.content, "html.parser")
 
     stuff = json.loads(str(soup))
@@ -32,10 +35,11 @@ while True:
             }
         )
 
-    if res[-1]["stars"] < 5:
+    if res[-1]["stars"] < 1:
         break
 
     i += 1
+    sleep(1)
 
 res = [x for x in res if x["stars"] >= 5]
 
