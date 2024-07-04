@@ -3,7 +3,7 @@ from pathlib import Path
 
 from cookiecutter.main import cookiecutter
 
-input_file = Path("test.json")
+input_file = Path("data/data.json")
 
 with input_file.open("r+") as stream:
     data = json.load(stream)
@@ -15,7 +15,7 @@ base_extra_content = {
     "repo_name": "project",
 }
 
-for item in data["results"]:
+for item in data:
     url = item["url"]
 
     print(f"Cutting {url}...")
@@ -24,7 +24,7 @@ for item in data["results"]:
         cookiecutter(
             url,
             no_input=True,
-            output_dir=f"/tmp/test/{url.split('/')[-1]}",
+            output_dir=f"data/repos/{url.split('/')[-1]}",
             extra_context=base_extra_content,
             accept_hooks=False,
             overwrite_if_exists=True,

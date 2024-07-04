@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 from sys import stderr
 
-discovery_dir = Path("/tmp/test")
+discovery_dir = Path("data/repos")
 
 def pprint(*args, **kwargs):
     print(*args, **kwargs, file=stderr)

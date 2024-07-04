@@ -8,10 +8,6 @@ library(sysfonts)
 font_add_google("Fira Code", "fira_code")
 showtext_auto()
 
-data <- read_csv("results.csv") |> filter(count > 1)
-
-hist(data$count)
-
 path_to_edges <- function(path) {
     path <- trimws(path, "left", whitespace = "/")
     pieces <- str_split_1(path, "/")
@@ -26,14 +22,10 @@ path_to_edges <- function(path) {
     out
 }
 
-all_paths <- lapply(data$path, path_to_edges)
-
 rm_dups <- function(x) {
     dups <- duplicated(V(x)$name)
     delete_vertices(x, V(x)[dups])
 }
-
-graph <- make_graph(edges = unlist(all_paths)) |> rm_dups()
 
 set_data <- function(graph) {
     for (name in V(graph)$name) {
@@ -51,9 +43,6 @@ set_data <- function(graph) {
     }
     graph
 }
-
-graph3 <- set_data(graph)
-
 
 calculate_angle_from_pos <- function(pos_dataframe, specials = NULL) {
     pos_dataframe$angle <- apply(pos_dataframe[,c("x", "y")], 1, \(x) {atan(x[2] / x[1])})
@@ -149,7 +138,6 @@ plot_result <- function(data_graph, title = "") {
     
     # Now we can calculate the final angles
     plot_labels <- calculate_angle_from_pos(get_point_coords(p))
-    print(plot_labels)
     
     expand_vec <- c(0.05, 0.05)
     
@@ -186,9 +174,18 @@ plot_result <- function(data_graph, title = "") {
     return(pp)
 }
 
+strip_names <- function(graph) {
+    V(graph)$name <- sapply(V(graph)$name, \(x) {str_split_1(x, "/") |> tail(1)})
+    graph
+}
+
+data <- read_csv("data/results.csv") |> filter(count > 1)
+all_paths <- lapply(data$path, path_to_edges)
+graph <- make_graph(edges = unlist(all_paths)) |> rm_dups()
+graph3 <- set_data(graph)
 p <- plot_result(strip_names(graph3))
 
-pdf("~/Desktop/test.pdf", width = 15, height=15)
+pdf("data/out/plot.pdf", width = 15, height=15)
 print(p)
 dev.off()
 
