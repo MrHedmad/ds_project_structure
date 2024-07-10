@@ -1,6 +1,7 @@
 library(tidyverse)
 library(igraph)
 library(ggraph)
+library(ggnewscale)
 library(extrafont)
 library(showtext)
 library(sysfonts)
@@ -27,18 +28,36 @@ rm_dups <- function(x) {
     delete_vertices(x, V(x)[dups])
 }
 
+filter_regex <- function(x, reg) {
+dups <- which(str_detect(V(x)$name, reg))
+    delete_vertices(x, V(x)[dups])
+}
+
 set_data <- function(graph) {
     for (name in V(graph)$name) {
+        original_name <- paste0("root/", trimws(data$path, "left", whitespace = "/"))
         new_value <- if (name == "root") {
             10
         } else {
-            data$count[paste0("root/", trimws(data$path, "left", whitespace = "/")) == name]
+            data$count[original_name == name]
         }
+        new_type <- if (name == "root") {
+            "directory"
+        } else {
+            data$types[original_name == name]
+        }
+
         graph <- set_vertex_attr(
             graph,
             "count",
             index = which(V(graph)$name == name),
             new_value
+        )
+        graph <- set_vertex_attr(
+            graph,
+            "type",
+            index = which(V(graph)$name == name),
+            new_type
         )
     }
     graph
@@ -51,7 +70,7 @@ calculate_angle_from_pos <- function(pos_dataframe, specials = NULL) {
     
     # Change the positions to be slightly more outward
     # 1. we calculate the hypothenuse + the dodge value
-    scaling_factor <- 0.01
+    scaling_factor <- 0.0088
     new_coords <- apply(pos_dataframe, 1, \(row) {
         name <- row["label"]; y <- as.numeric(row["y"]); angle <- as.numeric(row["angle"])
 
@@ -153,18 +172,21 @@ plot_result <- function(data_graph, title = "") {
             alpha = 0.5,
             show.legend = setNames(c(FALSE, FALSE, FALSE), c("color", "size", "alpha"))
         ) +
+        scale_color_manual(values = colours, limits = colours) +
+        new_scale_color() + 
         geom_node_text(
             aes(
                 x = plot_labels$dodged_x,
                 y = plot_labels$dodged_y,
-                label = plot_labels$label
+                label = plot_labels$label,
+                color = type
             ), angle = plot_labels$angle,
             size = 2.5,
             family="fira_code"
         ) +
-        scale_color_manual(values = colours, limits = colours, guide = guide_legend(title = "Count")) +
+        scale_color_manual(values = c("blue", "red")) +
         theme(
-            legend.position = "bottom",
+            legend.position = "none",
             panel.background = element_blank()
         ) +
         # Give more space to the plot area so the lables are drawn properly
@@ -179,9 +201,10 @@ strip_names <- function(graph) {
     graph
 }
 
-data <- read_csv("data/results.csv") |> filter(count > 1)
+data <- read_csv("data/results.csv") |> filter(count > 2)
 all_paths <- lapply(data$path, path_to_edges)
-graph <- make_graph(edges = unlist(all_paths)) |> rm_dups()
+graph <- make_graph(edges = unlist(all_paths)) |> rm_dups() |>
+    filter_regex(".gitkeep$") |> filter_regex("\\/?.git\\/?")
 graph3 <- set_data(graph)
 p <- plot_result(strip_names(graph3))
 

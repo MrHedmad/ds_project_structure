@@ -11,9 +11,10 @@ all_paths = []
 
 tot = 0
 for dir in os.listdir(discovery_dir):
+    trim_project = False
     pprint(f"Looking into {dir}...")
-    if not (target := discovery_dir / dir / "project").exists():
-        pprint(f"Rejected {dir} for not containing the 'project' folder")
+    target = discovery_dir / dir
+
     tot += 1
     for root, dirs, files in os.walk(target):
         root = Path(root[len(str(target)):])
