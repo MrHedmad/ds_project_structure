@@ -208,7 +208,7 @@ graph <- make_graph(edges = unlist(all_paths)) |> rm_dups() |>
 graph3 <- set_data(graph)
 p <- plot_result(strip_names(graph3))
 
-pdf("data/out/plot.pdf", width = 15, height=15)
+pdf("data/out/plot.pdf", width = 13, height=13)
 print(p)
 dev.off()
 
