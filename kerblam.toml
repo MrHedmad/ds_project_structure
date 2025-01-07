@@ -1,2 +1,5 @@
 [meta]
 version = "1.0.0-rc.3"
+
+[data.remote]
+"https://zenodo.org/records/13627214/files/repos.tar.gz?download=1" = "repos.tar.gz"
